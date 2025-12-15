@@ -20,9 +20,12 @@ export default function App() {
   const [showPopup, setShowPopup] = useState(false);
   const [showLeaderboardMobile, setShowLeaderboardMobile] = useState(false);
 
+  // ⭐ Added for instructions popup
+  const [showInstructions, setShowInstructions] = useState(false);
+
   const TOTAL_BOXES = 25;
   const GOOGLE_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbzot9el7f0XghGfmBMuvBt3G-p3dbWAGdiDpJ7uD7f-bUo8AL13-U6Ag6LzY19c880I/exec";
+    "https://script.google.com/macros/s/AKfycbwxlNPSZBmS6L4nHp5LdBW1F-fZn4DBnMXQuEUbRORh9J1flmhrdaziTdGHCve7NxWH/exec";
 
   // ⭐ Blink Time Auto Increase
   const getBlinkTime = () => {
@@ -188,6 +191,14 @@ export default function App() {
         >
           Signup
         </button>
+
+        {/* ⭐ How to Play Button Added */}
+        <button
+          className="mt-4 px-8 py-2 bg-gray-700 rounded"
+          onClick={() => setShowInstructions(true)}
+        >
+          How to Play
+        </button>
       </div>
     );
   }
@@ -278,12 +289,21 @@ export default function App() {
           </p>
         </div>
 
-        <button
-          className="px-6 py-2 bg-cyan-600 rounded-lg text-lg mb-6"
-          onClick={startGame}
-        >
-          Start Game
-        </button>
+        <div className="flex gap-3 mb-6">
+          <button
+            className="px-6 py-2 bg-cyan-600 rounded-lg text-lg"
+            onClick={startGame}
+          >
+            Start Game
+          </button>
+
+          <button
+            className="px-6 py-2 bg-gray-700 rounded-lg text-lg"
+            onClick={() => setShowInstructions(true)}
+          >
+            Instructions
+          </button>
+        </div>
 
         <div className="grid grid-cols-5 gap-3">
           {Array.from({ length: TOTAL_BOXES }).map((_, i) => {
@@ -333,7 +353,7 @@ export default function App() {
         </ul>
       </div>
 
-      {/* ⭐ MOBILE LEADERBOARD POPUP (FIXED + WORKING NOW) */}
+      {/* ⭐ MOBILE LEADERBOARD POPUP */}
       {showLeaderboardMobile && (
         <div className="fixed inset-0 bg-black/70 flex justify-center items-center md:hidden z-50">
           <div className="bg-slate-800 p-6 rounded-xl w-72">
@@ -358,6 +378,33 @@ export default function App() {
             <button
               className="mt-4 bg-red-500 px-4 py-2 rounded w-full"
               onClick={() => setShowLeaderboardMobile(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ⭐ ENGLISH INSTRUCTIONS POPUP */}
+      {showInstructions && (
+        <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
+          <div className="bg-slate-800 p-6 rounded-xl w-80 text-center shadow-xl">
+            <h2 className="text-2xl font-bold mb-4">How to Play</h2>
+
+            <ul className="text-gray-300 text-left space-y-2 mb-4">
+              <li>1️⃣ Tap "Start Game" to begin.</li>
+              <li>2️⃣ Some boxes will blink for a moment.</li>
+              <li>3️⃣ Memorize all blinking boxes.</li>
+              <li>4️⃣ After blinking stops, tap the same boxes.</li>
+              <li>5️⃣ Correct selection → Score +1</li>
+              <li>6️⃣ Wrong selection → Lose 1 lifeline</li>
+              <li>7️⃣ When lifelines reach 0 → Game Over</li>
+              <li>8️⃣ Your high score is saved automatically.</li>
+            </ul>
+
+            <button
+              className="bg-red-500 px-4 py-2 rounded w-full"
+              onClick={() => setShowInstructions(false)}
             >
               Close
             </button>
