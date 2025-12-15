@@ -22,7 +22,7 @@ export default function App() {
 
   const TOTAL_BOXES = 25;
   const GOOGLE_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbwxlNPSZBmS6L4nHp5LdBW1F-fZn4DBnMXQuEUbRORh9J1flmhrdaziTdGHCve7NxWH/exec";
+    "https://script.google.com/macros/s/AKfycbzot9el7f0XghGfmBMuvBt3G-p3dbWAGdiDpJ7uD7f-bUo8AL13-U6Ag6LzY19c880I/exec";
 
   // ⭐ Blink Time Auto Increase
   const getBlinkTime = () => {
