@@ -25,7 +25,7 @@ export default function App() {
 
   const TOTAL_BOXES = 25;
   const GOOGLE_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbwxlNPSZBmS6L4nHp5LdBW1F-fZn4DBnMXQuEUbRORh9J1flmhrdaziTdGHCve7NxWH/exec";
+    "https://script.google.com/macros/s/AKfycbwMVYxiRa_O2fLmn__aU1Qj8BMMVmLpj7I5L_qho66UygmbMAk1wGNPzuyrUOhzGbox/exec";
 
   // ⭐ Blink Time Auto Increase
   const getBlinkTime = () => {
@@ -66,8 +66,8 @@ export default function App() {
       method: "POST",
       body: JSON.stringify({
         mode: "login",
-        name: username,
-        password: userPassword,
+        name: String(username),
+        password: String(userPassword), // ⭐ ALWAYS STRING
       }),
     });
 
