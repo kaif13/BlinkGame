@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import Footer from "../src/component/Footer";
 
 export default function App() {
-  const [mode, setMode] = useState("menu"); // menu | login | signup | game
+  const [mode, setMode] = useState("menu");
   const [username, setUsername] = useState("");
   const [userPassword, setUserPassword] = useState("");
 
@@ -20,14 +21,15 @@ export default function App() {
   const [showPopup, setShowPopup] = useState(false);
   const [showLeaderboardMobile, setShowLeaderboardMobile] = useState(false);
 
-  // ⭐ Added for instructions popup
   const [showInstructions, setShowInstructions] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [floatText, setFloatText] = useState(null);
 
   const TOTAL_BOXES = 25;
   const GOOGLE_SCRIPT_URL =
     "https://script.google.com/macros/s/AKfycbwMVYxiRa_O2fLmn__aU1Qj8BMMVmLpj7I5L_qho66UygmbMAk1wGNPzuyrUOhzGbox/exec";
 
-  // ⭐ Blink Time Auto Increase
   const getBlinkTime = () => {
     if (score >= 20) return 300;
     if (score >= 15) return 400;
@@ -36,53 +38,58 @@ export default function App() {
     return 1000;
   };
 
-  // ⭐ SIGNUP Request
   const handleSignup = async () => {
     if (!username || !userPassword) return alert("Enter name & password!");
+    setLoading(true);
 
-    const res = await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        mode: "signup",
-        name: username,
-        password: userPassword,
-      }),
-    });
+    setTimeout(async () => {
+      const res = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          mode: "signup",
+          name: username,
+          password: userPassword,
+        }),
+      });
 
-    const text = await res.text();
+      const text = await res.text();
+      setLoading(false);
 
-    if (text === "USER_EXISTS") return alert("User already exists!");
-    if (text === "SIGNUP_SUCCESS") {
-      alert("Signup successful!");
-      setMode("login");
-    }
+      if (text === "USER_EXISTS") return alert("User already exists!");
+      if (text === "SIGNUP_SUCCESS") {
+        alert("Signup successful!");
+        setMode("login");
+      }
+    }, 3000);
   };
 
-  // ⭐ LOGIN Request
   const handleLogin = async () => {
     if (!username || !userPassword) return alert("Enter name & password!");
+    setLoading(true);
 
-    const res = await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        mode: "login",
-        name: String(username),
-        password: String(userPassword), // ⭐ ALWAYS STRING
-      }),
-    });
+    setTimeout(async () => {
+      const res = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          mode: "login",
+          name: String(username),
+          password: String(userPassword),
+        }),
+      });
 
-    const text = await res.text();
+      const text = await res.text();
+      setLoading(false);
 
-    if (text === "NO_USER") return alert("User does not exist!");
-    if (text === "WRONG_PASSWORD") return alert("Wrong password!");
+      if (text === "NO_USER") return alert("User does not exist!");
+      if (text === "WRONG_PASSWORD") return alert("Wrong password!");
 
-    const data = JSON.parse(text);
-    setHighScore(data.score);
-    setPlayerName(username);
-    setMode("game");
+      const data = JSON.parse(text);
+      setHighScore(data.score);
+      setPlayerName(username);
+      setMode("game");
+    }, 3000);
   };
 
-  // ⭐ Save Score Online
   const saveScoreOnline = async () => {
     await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
@@ -94,7 +101,6 @@ export default function App() {
     });
   };
 
-  // ⭐ Fetch Leaderboard
   const loadLeaderboard = async () => {
     const res = await fetch(GOOGLE_SCRIPT_URL);
     const data = await res.json();
@@ -106,7 +112,6 @@ export default function App() {
     loadLeaderboard();
   }, [showPopup]);
 
-  // ⭐ Game Start Logic
   const startGame = () => {
     setScore(0);
     setLifelines(3);
@@ -141,15 +146,16 @@ export default function App() {
 
     if (!correctPattern.includes(index)) {
       setWrongBox(index);
+      setFloatText({ text: "-1", color: "text-red-500" });
+      setTimeout(() => setFloatText(null), 2000);
 
       setTimeout(() => {
         if (lifelines > 1) {
           setLifelines((p) => p - 1);
           newRound();
-        } else {
-          gameOver();
-        }
+        } else gameOver();
       }, 500);
+
       return;
     }
 
@@ -159,6 +165,9 @@ export default function App() {
     if (updated.length === correctPattern.length) {
       const newScore = score + 1;
       setScore(newScore);
+
+      setFloatText({ text: "+1", color: "text-green-400" });
+      setTimeout(() => setFloatText(null), 2000);
 
       if (newScore > highScore) setHighScore(newScore);
 
@@ -172,29 +181,28 @@ export default function App() {
     setShowPopup(true);
   };
 
-  // ⭐ ------------------------ MENU SCREEN ------------------------
+  // ---------------- MENU ----------------
   if (mode === "menu") {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white">
-        <h1 className="text-3xl mb-8 font-bold">Memory Game</h1>
+      <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center">
+        <h1 className="text-3xl font-bold mb-6">Memory Game</h1>
 
         <button
-          className="px-8 py-3 bg-green-500 rounded mb-4"
+          className="px-8 py-3 bg-green-500 rounded mb-3"
           onClick={() => setMode("login")}
         >
           Login
         </button>
 
         <button
-          className="px-8 py-3 bg-blue-500 rounded"
+          className="px-8 py-3 bg-blue-500 rounded mb-3"
           onClick={() => setMode("signup")}
         >
           Signup
         </button>
 
-        {/* ⭐ How to Play Button Added */}
         <button
-          className="mt-4 px-8 py-2 bg-gray-700 rounded"
+          className="px-8 py-2 bg-gray-700 rounded"
           onClick={() => setShowInstructions(true)}
         >
           How to Play
@@ -203,19 +211,20 @@ export default function App() {
     );
   }
 
-  // ⭐ ------------------------ LOGIN SCREEN ------------------------
+  // ---------------- LOGIN ----------------
   if (mode === "login") {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white">
-        <h1 className="text-3xl mb-4 font-bold">Login</h1>
+      <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center">
+        <h1 className="text-3xl font-bold mb-4">Login</h1>
 
         <input
-          className="px-4 py-2 text-black rounded w-64 mb-2"
+          className="px-4 py-2 w-64 rounded text-black mb-2"
           placeholder="Enter Name"
           onChange={(e) => setUsername(e.target.value)}
         />
+
         <input
-          className="px-4 py-2 text-black rounded w-64 mb-4"
+          className="px-4 py-2 w-64 rounded text-black mb-4"
           placeholder="Enter Password"
           type="password"
           onChange={(e) => setUserPassword(e.target.value)}
@@ -224,8 +233,9 @@ export default function App() {
         <button
           className="px-6 py-2 bg-green-600 rounded mb-3"
           onClick={handleLogin}
+          disabled={loading}
         >
-          Login
+          {loading ? "Processing..." : "Login"}
         </button>
 
         <button className="text-blue-400" onClick={() => setMode("signup")}>
@@ -235,19 +245,20 @@ export default function App() {
     );
   }
 
-  // ⭐ ------------------------ SIGNUP SCREEN ------------------------
+  // ---------------- SIGNUP ----------------
   if (mode === "signup") {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white">
-        <h1 className="text-3xl mb-4 font-bold">Signup</h1>
+      <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center">
+        <h1 className="text-3xl font-bold mb-4">Signup</h1>
 
         <input
-          className="px-4 py-2 text-black rounded w-64 mb-2"
+          className="px-4 py-2 w-64 rounded text-black mb-2"
           placeholder="Choose Name"
           onChange={(e) => setUsername(e.target.value)}
         />
+
         <input
-          className="px-4 py-2 text-black rounded w-64 mb-4"
+          className="px-4 py-2 w-64 rounded text-black mb-4"
           placeholder="Choose Password"
           type="password"
           onChange={(e) => setUserPassword(e.target.value)}
@@ -256,8 +267,9 @@ export default function App() {
         <button
           className="px-6 py-2 bg-blue-600 rounded mb-3"
           onClick={handleSignup}
+          disabled={loading}
         >
-          Signup
+          {loading ? "Processing..." : "Signup"}
         </button>
 
         <button className="text-green-400" onClick={() => setMode("login")}>
@@ -267,17 +279,28 @@ export default function App() {
     );
   }
 
-  // ⭐ ------------------------ GAME SCREEN ------------------------
+  // ---------------- GAME SCREEN ----------------
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col relative">
-      {/* MAIN GAME PANEL */}
+      {/* FLOAT TEXT */}
+      {floatText && (
+        <div
+          className={`absolute top-[48%] left-1/2 -translate-x-1/2 -translate-y-1/2 
+                         text-6xl font-bold ${floatText.color} animate-float`}
+        >
+          {floatText.text}
+        </div>
+      )}
+
+      {/* MAIN GAME */}
       <div className="w-full flex flex-col items-center py-8 flex-grow">
         <h1 className="text-3xl font-bold mb-2">Memory Booster Game</h1>
+
         <p className="text-lg mb-4">
           Player: <span className="text-yellow-300">{playerName}</span>
         </p>
 
-        <div className="flex gap-6 text-xl mb-5">
+        <div className="flex gap-6 text-xl mb-6">
           <p>
             Score: <span className="text-cyan-400">{score}</span>
           </p>
@@ -289,7 +312,8 @@ export default function App() {
           </p>
         </div>
 
-        <div className="flex gap-3 mb-6">
+        {/* DESKTOP BUTTONS */}
+        <div className="hidden md:flex gap-3 mb-6">
           <button
             className="px-6 py-2 bg-cyan-600 rounded-lg text-lg"
             onClick={startGame}
@@ -305,10 +329,28 @@ export default function App() {
           </button>
         </div>
 
-        <div className="grid grid-cols-5 gap-3">
+        {/* ⭐ MOBILE: SMALL BUTTONS SIDE BY SIDE */}
+        {/* ⭐ MOBILE BUTTONS — Compact Centered Buttons */}
+        <div className="flex md:hidden gap-3 mb-4 justify-center">
+          <button
+            className="bg-cyan-600 px-4 py-2 rounded text-sm"
+            onClick={startGame}
+          >
+            Start Game
+          </button>
+
+          <button
+            className="bg-blue-600 px-4 py-2 rounded text-sm"
+            onClick={() => setShowLeaderboardMobile(true)}
+          >
+            Leaderboard
+          </button>
+        </div>
+
+        {/* GRID */}
+        <div className="grid grid-cols-5 gap-3 mb-6">
           {Array.from({ length: TOTAL_BOXES }).map((_, i) => {
             let boxColor = "#334155";
-
             if (blinkBoxes.includes(i)) boxColor = "#22ff55";
             if (selected.includes(i)) boxColor = "#9ca3af";
             if (wrongBox === i) boxColor = "#ef4444";
@@ -317,25 +359,23 @@ export default function App() {
               <div
                 key={i}
                 onClick={() => handleClick(i)}
-                style={{
-                  backgroundColor: boxColor,
-                  transition: "0.2s",
-                }}
+                style={{ backgroundColor: boxColor, transition: "0.2s" }}
                 className="w-16 h-16 rounded-xl cursor-pointer hover:scale-95"
               ></div>
             );
           })}
         </div>
 
+        {/* ⭐ MOBILE Instructions BELOW GRID */}
         <button
-          className="mt-6 md:hidden bg-blue-500 px-5 py-2 rounded"
-          onClick={() => setShowLeaderboardMobile(true)}
+          className="md:hidden bg-gray-700 px-4 py-2 rounded text-sm mb-4"
+          onClick={() => setShowInstructions(true)}
         >
-          Leaderboard
+          Instructions
         </button>
       </div>
 
-      {/* DESKTOP LEADERBOARD */}
+      {/* DESKTOP LEADERBOARD PANEL */}
       <div className="hidden md:block w-80 bg-slate-800 p-5 border-l border-slate-700 absolute right-0 top-0 bottom-0">
         <h2 className="text-2xl font-bold mb-4">🏆 Leaderboard</h2>
         <ul>
@@ -353,7 +393,7 @@ export default function App() {
         </ul>
       </div>
 
-      {/* ⭐ MOBILE LEADERBOARD POPUP */}
+      {/* MOBILE LEADERBOARD POPUP */}
       {showLeaderboardMobile && (
         <div className="fixed inset-0 bg-black/70 flex justify-center items-center md:hidden z-50">
           <div className="bg-slate-800 p-6 rounded-xl w-72">
@@ -385,7 +425,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ⭐ ENGLISH INSTRUCTIONS POPUP */}
+      {/* INSTRUCTIONS POPUP */}
       {showInstructions && (
         <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
           <div className="bg-slate-800 p-6 rounded-xl w-80 text-center shadow-xl">
@@ -417,6 +457,7 @@ export default function App() {
         <div className="absolute inset-0 bg-black/60 flex justify-center items-center">
           <div className="bg-slate-800 p-8 rounded-xl text-center shadow-xl w-80">
             <h2 className="text-2xl font-bold mb-4">Game Over</h2>
+
             <p className="text-lg mb-4">
               Your Score: <span className="text-cyan-400">{score}</span>
             </p>
@@ -438,13 +479,7 @@ export default function App() {
         </div>
       )}
 
-      {/* FOOTER */}
-      <footer className="w-full py-4 bg-slate-800 text-center text-gray-300 border-t border-slate-700">
-        <p className="text-sm tracking-wide">
-          © {new Date().getFullYear()} • Created with ❤️ by
-          <span className="text-cyan-400 font-semibold"> Mohammad Kaif</span>
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 }

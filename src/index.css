@@ -21,3 +21,19 @@
   /* animation: blink 1s; */
   background-color: #22ff55 !important;
 }
+
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(-70px);
+  }
+}
+
+.animate-float {
+  pointer-events: none;
+  animation: floatUp 2s ease-out forwards;
+}
