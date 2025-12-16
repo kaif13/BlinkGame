@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import Footer from "../src/component/Footer";
+import GameOver from "./component/GameOver";
+import Instructions from "./component/Instructions";
 
 export default function App() {
   const [mode, setMode] = useState("menu");
@@ -171,7 +173,10 @@ export default function App() {
 
       if (newScore > highScore) setHighScore(newScore);
 
-      newRound();
+      // ⭐ next green blink se pehle 0.2 sec ka pause
+      setTimeout(() => {
+        newRound();
+      }, 200);
     }
   };
 
@@ -426,59 +431,20 @@ export default function App() {
       )}
 
       {/* INSTRUCTIONS POPUP */}
+
+      <button onClick={() => setShowInstructions(true)}></button>
       {showInstructions && (
-        <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
-          <div className="bg-slate-800 p-6 rounded-xl w-80 text-center shadow-xl">
-            <h2 className="text-2xl font-bold mb-4">How to Play</h2>
-
-            <ul className="text-gray-300 text-left space-y-2 mb-4">
-              <li>1️⃣ Tap "Start Game" to begin.</li>
-              <li>2️⃣ Some boxes will blink for a moment.</li>
-              <li>3️⃣ Memorize all blinking boxes.</li>
-              <li>4️⃣ After blinking stops, tap the same boxes.</li>
-              <li>5️⃣ Correct selection → Score +1</li>
-              <li>6️⃣ Wrong selection → Lose 1 lifeline</li>
-              <li>7️⃣ When lifelines reach 0 → Game Over</li>
-              <li>8️⃣ Your high score is saved automatically.</li>
-            </ul>
-
-            <button
-              className="bg-red-500 px-4 py-2 rounded w-full"
-              onClick={() => setShowInstructions(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
+        <Instructions onClose={() => setShowInstructions(false)} />
       )}
 
       {/* GAME OVER POPUP */}
       {showPopup && (
-        <div className="absolute inset-0 bg-black/60 flex justify-center items-center">
-          <div className="bg-slate-800 p-8 rounded-xl text-center shadow-xl w-80">
-            <h2 className="text-2xl font-bold mb-4">Game Over</h2>
-
-            <p className="text-lg mb-4">
-              Your Score: <span className="text-cyan-400">{score}</span>
-            </p>
-
-            <button
-              className="px-4 py-2 bg-red-500 rounded-lg mr-3"
-              onClick={() => setShowPopup(false)}
-            >
-              Close
-            </button>
-
-            <button
-              className="px-4 py-2 bg-green-500 rounded-lg"
-              onClick={startGame}
-            >
-              Restart
-            </button>
-          </div>
-        </div>
+        <GameOver
+          score={score}
+          onClose={() => setShowPopup(false)}
+          onRestart={startGame}
+        />
       )}
-
       <Footer />
     </div>
   );
