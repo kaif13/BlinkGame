@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import Footer from "../src/component/Footer";
 import GameOver from "./component/GameOver";
 import Instructions from "./component/Instructions";
+import Leaderboard from "./component/Leaderboard";
+import MainGame from "./component/MainGame";
+import Menu from "./component/Menu";
 
 export default function App() {
   const [mode, setMode] = useState("menu");
@@ -189,30 +192,11 @@ export default function App() {
   // ---------------- MENU ----------------
   if (mode === "menu") {
     return (
-      <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center">
-        <h1 className="text-3xl font-bold mb-6">Memory Game</h1>
-
-        <button
-          className="px-8 py-3 bg-green-500 rounded mb-3"
-          onClick={() => setMode("login")}
-        >
-          Login
-        </button>
-
-        <button
-          className="px-8 py-3 bg-blue-500 rounded mb-3"
-          onClick={() => setMode("signup")}
-        >
-          Signup
-        </button>
-
-        <button
-          className="px-8 py-2 bg-gray-700 rounded"
-          onClick={() => setShowInstructions(true)}
-        >
-          How to Play
-        </button>
-      </div>
+      <Menu
+        onLogin={() => setMode("login")}
+        onSignup={() => setMode("signup")}
+        onInstructions={() => setShowInstructions(true)}
+      />
     );
   }
 
@@ -298,137 +282,27 @@ export default function App() {
       )}
 
       {/* MAIN GAME */}
-      <div className="w-full flex flex-col items-center py-8 flex-grow">
-        <h1 className="text-3xl font-bold mb-2">Memory Booster Game</h1>
+      <MainGame
+        playerName={playerName}
+        score={score}
+        lifelines={lifelines}
+        highScore={highScore}
+        startGame={startGame}
+        setShowInstructions={setShowInstructions}
+        setShowLeaderboardMobile={setShowLeaderboardMobile}
+        TOTAL_BOXES={TOTAL_BOXES}
+        blinkBoxes={blinkBoxes}
+        selected={selected}
+        wrongBox={wrongBox}
+        handleClick={handleClick}
+      />
 
-        <p className="text-lg mb-4">
-          Player: <span className="text-yellow-300">{playerName}</span>
-        </p>
-
-        <div className="flex gap-6 text-xl mb-6">
-          <p>
-            Score: <span className="text-cyan-400">{score}</span>
-          </p>
-          <p>
-            Lifelines: <span className="text-red-400">{lifelines}</span>
-          </p>
-          <p>
-            High Score: <span className="text-green-400">{highScore}</span>
-          </p>
-        </div>
-
-        {/* DESKTOP BUTTONS */}
-        <div className="hidden md:flex gap-3 mb-6">
-          <button
-            className="px-6 py-2 bg-cyan-600 rounded-lg text-lg"
-            onClick={startGame}
-          >
-            Start Game
-          </button>
-
-          <button
-            className="px-6 py-2 bg-gray-700 rounded-lg text-lg"
-            onClick={() => setShowInstructions(true)}
-          >
-            Instructions
-          </button>
-        </div>
-
-        {/* ⭐ MOBILE: SMALL BUTTONS SIDE BY SIDE */}
-        {/* ⭐ MOBILE BUTTONS — Compact Centered Buttons */}
-        <div className="flex md:hidden gap-3 mb-4 justify-center">
-          <button
-            className="bg-cyan-600 px-4 py-2 rounded text-sm"
-            onClick={startGame}
-          >
-            Start Game
-          </button>
-
-          <button
-            className="bg-blue-600 px-4 py-2 rounded text-sm"
-            onClick={() => setShowLeaderboardMobile(true)}
-          >
-            Leaderboard
-          </button>
-        </div>
-
-        {/* GRID */}
-        <div className="grid grid-cols-5 gap-3 mb-6">
-          {Array.from({ length: TOTAL_BOXES }).map((_, i) => {
-            let boxColor = "#334155";
-            if (blinkBoxes.includes(i)) boxColor = "#22ff55";
-            if (selected.includes(i)) boxColor = "#9ca3af";
-            if (wrongBox === i) boxColor = "#ef4444";
-
-            return (
-              <div
-                key={i}
-                onClick={() => handleClick(i)}
-                style={{ backgroundColor: boxColor, transition: "0.2s" }}
-                className="w-16 h-16 rounded-xl cursor-pointer hover:scale-95"
-              ></div>
-            );
-          })}
-        </div>
-
-        {/* ⭐ MOBILE Instructions BELOW GRID */}
-        <button
-          className="md:hidden bg-gray-700 px-4 py-2 rounded text-sm mb-4"
-          onClick={() => setShowInstructions(true)}
-        >
-          Instructions
-        </button>
-      </div>
-
-      {/* DESKTOP LEADERBOARD PANEL */}
-      <div className="hidden md:block w-80 bg-slate-800 p-5 border-l border-slate-700 absolute right-0 top-0 bottom-0">
-        <h2 className="text-2xl font-bold mb-4">🏆 Leaderboard</h2>
-        <ul>
-          {leaderboard.map((item, index) => (
-            <li
-              key={index}
-              className="mb-3 p-2 bg-slate-700 rounded flex justify-between"
-            >
-              <p className="font-bold">
-                #{index + 1} — {item.name}
-              </p>
-              <p>{item.score}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* MOBILE LEADERBOARD POPUP */}
-      {showLeaderboardMobile && (
-        <div className="fixed inset-0 bg-black/70 flex justify-center items-center md:hidden z-50">
-          <div className="bg-slate-800 p-6 rounded-xl w-72">
-            <h3 className="text-2xl font-bold mb-4 text-center">
-              🏆 Leaderboard
-            </h3>
-
-            <ul>
-              {leaderboard.map((item, index) => (
-                <li
-                  key={index}
-                  className="mb-3 p-2 bg-slate-700 rounded flex justify-between"
-                >
-                  <p className="font-bold">
-                    #{index + 1} — {item.name}
-                  </p>
-                  <p>{item.score}</p>
-                </li>
-              ))}
-            </ul>
-
-            <button
-              className="mt-4 bg-red-500 px-4 py-2 rounded w-full"
-              onClick={() => setShowLeaderboardMobile(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      {/* DESKTOP & Mobile LEADERBOARD PANEL */}
+      <Leaderboard
+        leaderboard={leaderboard}
+        showMobile={showLeaderboardMobile}
+        onCloseMobile={() => setShowLeaderboardMobile(false)}
+      />
 
       {/* INSTRUCTIONS POPUP */}
 
